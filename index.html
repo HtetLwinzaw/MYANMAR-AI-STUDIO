@@ -41,6 +41,19 @@
       border: 1px solid #2e2e3d;
       font-size: 13px;
       color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .option-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 13.5px;
+      color: #ddd;
+    }
+    .option-row input {
+      width: auto;
+      margin: 0;
     }
     button {
       background: #4f46e5;
@@ -54,24 +67,6 @@
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-    }
-    .style-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .style-btn {
-      width: auto;
-      margin-top: 0;
-      padding: 7px 11px;
-      font-size: 12.5px;
-      background: #23232b;
-      border: 1px solid #444;
-      font-weight: normal;
-    }
-    .style-btn:hover {
-      background: #2f2f3a;
     }
     #result {
       margin-top: 16px;
@@ -106,60 +101,91 @@
 </head>
 <body>
   <h1>Myanmar AI Studio</h1>
-  <p class="sub">ပုံထုတ်ရန် စာရေးပါ (အင်္ဂလိပ်လို အသေးစိတ်ရေးလေ ပိုကောင်းလေ  Watermark မပါ)</p>
+  <p class="sub">AI ၁ ခုလျှင် ၁၀ ပုံ/နေ့  AI ၅ ခု စုစုပေါင်း ၅၀ ပုံ/နေ့ (ကြိုက်တဲ့ပုံစံ ထုတ်နိုင်  Auto-Switch မလုပ်ပါ  Watermark မပါ)</p>
 
   <select id="provider" onchange="updateAiInfo()">
-    <option value="ultra-cinema-pro">AI 1 - Ultra Cinema Pro (Quality အမြင့်ဆုံး  ~15-25 ပုံ/နေ့)</option>
-    <option value="modern-studio-hd">AI 2 - Modern Studio HD (Quality အလွန်ကောင်း  ~30-50 ပုံ/နေ့)</option>
-    <option value="creative-art-plus">AI 3 - Creative Art Plus (Quality ကောင်း  ~50-100 ပုံ/နေ့)</option>
-    <option value="motion-dynamic">AI 4 - Motion & Dynamic (မြန်ဆန်/ကောင်း  ~100-150 ပုံ/နေ့)</option>
-    <option value="clean-background-lite">AI 5 - Clean Background Lite (မြန်ဆန်/ပေါ့ပါး  ~150-250+ ပုံ/နေ့)</option>
+    <option value="studio-engine-01">AI 1 - Studio Engine 01 (10 ပုံ/နေ့  All Styles)</option>
+    <option value="studio-engine-02">AI 2 - Studio Engine 02 (10 ပုံ/နေ့  All Styles)</option>
+    <option value="studio-engine-03">AI 3 - Studio Engine 03 (10 ပုံ/နေ့  All Styles)</option>
+    <option value="studio-engine-04">AI 4 - Studio Engine 04 (10 ပုံ/နေ့  All Styles)</option>
+    <option value="studio-engine-05">AI 5 - Studio Engine 05 (10 ပုံ/နေ့  All Styles)</option>
   </select>
 
   <div id="aiInfo" class="ai-info"></div>
 
-  <textarea id="prompt" rows="4" placeholder="ပုံဖော်ချင်တဲ့ အကြောင်းအရာနဲ့ အသေးစိတ်ကို ရေးပါ (ဥပမာ: Ancient royal palace at sunrise...)"></textarea>
+  <textarea id="prompt" rows="4" placeholder="ထုတ်ချင်တဲ့ ပုံအကြောင်းကို English လို တိတိကျကျ ရေးပါ..."></textarea>
 
-  <div class="style-row">
-    <button type="button" class="style-btn" onclick="applyPreset('cinematic')">+ Cinematic</button>
-    <button type="button" class="style-btn" onclick="applyPreset('modern')">+ Modern</button>
-    <button type="button" class="style-btn" onclick="applyPreset('history')">+ History</button>
-    <button type="button" class="style-btn" onclick="applyPreset('motion')">+ Motion</button>
-    <button type="button" class="style-btn" onclick="applyPreset('background')">+ Background</button>
-  </div>
+  <label class="option-row">
+    <input type="checkbox" id="precisionBoost" checked />
+    <span>Prompt အတိုင်း ပိုတိကျပြီး အရည်အသွေးမြင့်အောင် Precision Detail ပေါင်းထည့်မည်</span>
+  </label>
 
   <button id="btn" onclick="generate()">ထုတ်မယ်</button>
 
   <div id="result">ရလဒ် ဒီမှာ ပေါ်မယ်</div>
 
   <script>
-    const AI_DETAILS = {
-      "ultra-cinema-pro": "အဆင့် ၁ (Highest Quality): ခန့်မှန်း နေ့စဉ် ~1525 ပုံ | Cinematic, History နှင့် အသေးစိတ်အကျဆုံး ပုံများအတွက်",
-      "modern-studio-hd": "အဆင့် ၂ (Very High Quality): ခန့်မှန်း နေ့စဉ် ~3050 ပုံ | Modern, Clean Design နှင့် ကြည်လင်ပြတ်သားသော ပုံများအတွက်",
-      "creative-art-plus": "အဆင့် ၃ (High Quality): ခန့်မှန်း နေ့စဉ် ~50100 ပုံ | History, Creative Concept နှင့် အနုပညာဆန်သော ပုံများအတွက်",
-      "motion-dynamic": "အဆင့် ၄ (Fast & Good Quality): ခန့်မှန်း နေ့စဉ် ~100150 ပုံ | Motion, လှုပ်ရှားမှုနှင့် Dynamic ရှုထောင့်ပုံများအတွက်",
-      "clean-background-lite": "အဆင့် ၅ (Fast & Light Quality): ခန့်မှန်း နေ့စဉ် ~150250+ ပုံ | Background, Wallpaper နှင့် ရိုးရှင်းမြန်ဆန်သော ပုံများအတွက်"
+    const DAILY_LIMIT_PER_AI = 10;
+
+    const AI_NAMES = {
+      "studio-engine-01": "AI 1 - Studio Engine 01",
+      "studio-engine-02": "AI 2 - Studio Engine 02",
+      "studio-engine-03": "AI 3 - Studio Engine 03",
+      "studio-engine-04": "AI 4 - Studio Engine 04",
+      "studio-engine-05": "AI 5 - Studio Engine 05"
     };
 
-    const STYLE_PRESETS = {
-      cinematic: "cinematic lighting, 35mm lens, shallow depth of field, dramatic rim light, rich contrast, film grain, ultra detailed, no watermark",
-      modern: "modern sleek aesthetic, contemporary architecture, clean composition, balanced studio lighting, sharp focus, high clarity, no watermark",
-      history: "historical atmosphere, authentic period details, epic scale, warm natural lighting, museum-grade realism, intricate textures, no watermark",
-      motion: "dynamic motion blur, high speed action, sense of movement, energetic composition, crisp focal subject, dramatic lighting, no watermark",
-      background: "clean background composition, uncluttered space, smooth gradient and depth, high resolution backdrop, subtle lighting, no watermark"
-    };
+    function getTodayKey() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
+      return `myanmar_ai_usage_v2_${y}-${m}-${d}`;
+    }
+
+    function getUsageMap() {
+      try {
+        return JSON.parse(localStorage.getItem(getTodayKey()) || "{}");
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function incrementUsage(provider) {
+      const map = getUsageMap();
+      map[provider] = (map[provider] || 0) + 1;
+      localStorage.setItem(getTodayKey(), JSON.stringify(map));
+      return map[provider];
+    }
+
+    function getRemaining(provider) {
+      const used = getUsageMap()[provider] || 0;
+      return Math.max(0, DAILY_LIMIT_PER_AI - used);
+    }
+
+    function getTotalRemaining() {
+      return Object.keys(AI_NAMES).reduce((sum, key) => sum + getRemaining(key), 0);
+    }
 
     function updateAiInfo() {
       const provider = document.getElementById("provider").value;
-      document.getElementById("aiInfo").textContent = AI_DETAILS[provider] || "";
+      const used = getUsageMap()[provider] || 0;
+      const left = Math.max(0, DAILY_LIMIT_PER_AI - used);
+      const totalLeft = getTotalRemaining();
+      const name = AI_NAMES[provider] || provider;
+
+      document.getElementById("aiInfo").innerHTML =
+        `<b>${name}:</b> ကြိုက်တဲ့ပုံစံ အားလုံးထုတ်နိုင် | <b>ကျန်ရှိပုံ:</b> ${left} / ${DAILY_LIMIT_PER_AI} ပုံ (သုံးပြီး: ${used} ပုံ)<br>` +
+        `<b>AI ၅ ခု စုစုပေါင်းကျန်ရှိပုံ:</b> ${totalLeft} / 50 ပုံ`;
     }
 
-    function applyPreset(key) {
-      const promptEl = document.getElementById("prompt");
-      const current = promptEl.value.trim();
-      const preset = STYLE_PRESETS[key];
-      if (!preset) return;
-      promptEl.value = current ? `${current}, ${preset}` : preset;
+    function buildFinalPrompt(rawPrompt, usePrecision) {
+      if (!usePrecision) return rawPrompt;
+      const lower = rawPrompt.toLowerCase();
+      if (lower.includes("accurate composition") || lower.includes("no watermark")) {
+        return rawPrompt;
+      }
+      return `${rawPrompt}. Accurate composition matching the prompt, natural lighting and textures, sharp details, no watermark, no text overlay.`;
     }
 
     function isLimitError(resStatus, data) {
@@ -190,17 +216,26 @@
     async function generate() {
       const promptEl = document.getElementById("prompt");
       const providerEl = document.getElementById("provider");
+      const precisionEl = document.getElementById("precisionBoost");
       const result = document.getElementById("result");
       const btn = document.getElementById("btn");
 
-      const prompt = promptEl.value.trim();
+      const rawPrompt = promptEl.value.trim();
       const provider = providerEl.value;
       const providerLabel = providerEl.options[providerEl.selectedIndex].text;
 
-      if (!prompt) {
+      if (!rawPrompt) {
         result.innerHTML = '<span class="err">ပုံထုတ်ရန် prompt စာအရင်ရေးပါ</span>';
         return;
       }
+
+      if (getRemaining(provider) <= 0) {
+        result.innerHTML = `<span class="err"><b>${providerLabel}</b> ရဲ့ ယနေ့ ၁၀ ပုံ limit ပြည့်သွားပါပြီ။ အပေါ်က dropdown မှာ တခြား AI တစ်ခုကို ကိုယ်တိုင်ပြောင်းရွေးပြီး ထပ်ထုတ်ပါ။</span>`;
+        updateAiInfo();
+        return;
+      }
+
+      const finalPrompt = buildFinalPrompt(rawPrompt, precisionEl.checked);
 
       btn.disabled = true;
       result.innerHTML = `<div class="status-note">အသုံးပြုနေသော AI: <b>${providerLabel}</b></div>ပုံထုတ်နေပါတယ်၊ ခဏစောင့်ပါ...`;
@@ -209,7 +244,7 @@
         const res = await fetch("/api/image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt, provider })
+          body: JSON.stringify({ prompt: finalPrompt, provider })
         });
 
         let data = {};
@@ -222,6 +257,7 @@
         if (isLimitError(res.status, data)) {
           result.innerHTML = `<span class="err"><b>${providerLabel}</b> ရဲ့ limit ပြည့်သွားပါပြီ။ အပေါ်က dropdown မှာ တခြား AI တစ်ခုကို ကိုယ်တိုင်ပြောင်းရွေးပြီး ထပ်ထုတ်ကြည့်ပါ။</span>`;
           btn.disabled = false;
+          updateAiInfo();
           return;
         }
 
@@ -231,14 +267,17 @@
           return;
         }
 
+        const usedNow = incrementUsage(provider);
+        updateAiInfo();
+
         result.innerHTML = "";
         const note = document.createElement("div");
         note.className = "status-note";
-        note.textContent = `ထုတ်ပြီးသွားသော AI: ${providerLabel}`;
+        note.textContent = `ထုတ်ပြီးသွားသော AI: ${providerLabel} (${usedNow}/${DAILY_LIMIT_PER_AI} ပုံ)`;
 
         const img = document.createElement("img");
         img.src = data.image;
-        img.alt = prompt;
+        img.alt = rawPrompt;
 
         result.appendChild(note);
         result.appendChild(img);
