@@ -14,32 +14,32 @@ function json(data, status = 200) {
   });
 }
 
-function getModelConfig(provider) {
+function getEngineConfig(provider) {
   switch (provider) {
-    case "ultra-cinema-pro":
+    case "studio-engine-01":
       return {
         model: "@cf/black-forest-labs/flux-1-schnell",
         input: { steps: 6 }
       };
-    case "modern-studio-hd":
+    case "studio-engine-02":
       return {
         model: "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-        input: { num_steps: 25 }
+        input: { num_steps: 30 }
       };
-    case "creative-art-plus":
+    case "studio-engine-03":
       return {
         model: "@cf/bytedance/sdxl-lightning",
         input: { num_steps: 8 }
       };
-    case "motion-dynamic":
+    case "studio-engine-04":
       return {
         model: "@cf/lykon/dreamshaper-8-lcm",
         input: { num_steps: 8 }
       };
-    case "clean-background-lite":
+    case "studio-engine-05":
       return {
-        model: "@cf/stabilityai/sdxl-lightning",
-        input: { num_steps: 4 }
+        model: "@cf/black-forest-labs/flux-1-schnell",
+        input: { steps: 4 }
       };
     default:
       return null;
@@ -93,11 +93,11 @@ export async function onRequestPost({ request, env }) {
     const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
     const provider = typeof body.provider === "string" ? body.provider.trim() : "";
 
-    if (!prompt || prompt.length > 1200) {
+    if (!prompt || prompt.length > 1500) {
       return json({ error: "BAD_PROMPT" }, 400);
     }
 
-    const config = getModelConfig(provider);
+    const config = getEngineConfig(provider);
     if (!config) {
       return json({ error: "UNKNOWN_PROVIDER" }, 400);
     }
