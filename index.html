@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My AI App</title>
+<style>
+  body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; background: #111; color: #eee; }
+  h1 { font-size: 22px; }
+  textarea, select, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #444; background: #222; color: #eee; box-sizing: border-box; }
+  button { background: #4f46e5; border: none; font-weight: bold; }
+  #result { margin-top: 16px; padding: 12px; border-radius: 8px; background: #222; min-height: 60px; }
+</style>
+</head>
+<body>
+  <h1>Myanmar AI Studio</h1>
+  <p>ပုံထုတ်ရန် စာရေးပါ</p>
+
+  <select id="provider">
+    <option>AI 1 (မကြာမီ ထည့်မယ်)</option>
+  </select>
+
+  <textarea id="prompt" rows="4" placeholder="ဥပမာ: a cat sitting on the moon"></textarea>
+  <button onclick="generate()">ထုတ်မယ်</button>
+
+  <div id="result">ရလဒ် ဒီမှာ ပေါ်မယ်</div>
+
+<script>
+  function generate() {
+    var text = document.getElementById("prompt").value;
+    document.getElementById("result").innerText =
+      "Web အလုပ်လုပ်နေပါပြီ။ ရေးထားတာ: " + text;
+  }
+</script>
+</body>
+</html>
