@@ -1,70 +1,256 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Myanmar AI Studio</title>
-<style>
-  body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; background: #111; color: #eee; }
-  h1 { font-size: 22px; }
-  textarea, select, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #444; background: #222; color: #eee; box-sizing: border-box; }
-  button { background: #4f46e5; border: none; font-weight: bold; }
-  button:disabled { opacity: 0.5; }
-  #result { margin-top: 16px; padding: 12px; border-radius: 8px; background: #222; min-height: 60px; }
-  #result img { width: 100%; border-radius: 8px; }
-  .err { color: #ff8080; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Myanmar AI Studio</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 640px;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+      background: #111;
+      color: #eee;
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .sub {
+      color: #bbb;
+      font-size: 14px;
+      margin-top: 0;
+    }
+    textarea, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #444;
+      background: #222;
+      color: #eee;
+      box-sizing: border-box;
+    }
+    .ai-info {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #191922;
+      border: 1px solid #2e2e3d;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    button {
+      background: #4f46e5;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) {
+      background: #4338ca;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .style-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .style-btn {
+      width: auto;
+      margin-top: 0;
+      padding: 7px 11px;
+      font-size: 12.5px;
+      background: #23232b;
+      border: 1px solid #444;
+      font-weight: normal;
+    }
+    .style-btn:hover {
+      background: #2f2f3a;
+    }
+    #result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #1a1a1f;
+      border: 1px solid #2e2e38;
+      min-height: 48px;
+    }
+    #result img {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+    }
+    .status-note {
+      font-size: 13px;
+      color: #93c5fd;
+      margin-bottom: 8px;
+    }
+    .err {
+      color: #ff8080;
+      line-height: 1.5;
+    }
+    .download-btn {
+      background: #15803d;
+      margin-top: 10px;
+    }
+    .download-btn:hover {
+      background: #166534;
+    }
+  </style>
 </head>
 <body>
   <h1>Myanmar AI Studio</h1>
-  <p>ပုံထုတ်ရန် စာရေးပါ (အင်္ဂလိပ်လို ရေးမှ ပိုကောင်းတယ်)</p>
+  <p class="sub">ပုံထုတ်ရန် စာရေးပါ (အင်္ဂလိပ်လို အသေးစိတ်ရေးလေ ပိုကောင်းလေ  Watermark မပါ)</p>
 
-  <select id="provider">
-    <option value="flux">AI 1 - FLUX (အရည်အသွေးကောင်း)</option>
-    <option value="sdxl">AI 2 - SDXL (မြန်)</option>
+  <select id="provider" onchange="updateAiInfo()">
+    <option value="ultra-cinema-pro">AI 1 - Ultra Cinema Pro (Quality အမြင့်ဆုံး  ~15-25 ပုံ/နေ့)</option>
+    <option value="modern-studio-hd">AI 2 - Modern Studio HD (Quality အလွန်ကောင်း  ~30-50 ပုံ/နေ့)</option>
+    <option value="creative-art-plus">AI 3 - Creative Art Plus (Quality ကောင်း  ~50-100 ပုံ/နေ့)</option>
+    <option value="motion-dynamic">AI 4 - Motion & Dynamic (မြန်ဆန်/ကောင်း  ~100-150 ပုံ/နေ့)</option>
+    <option value="clean-background-lite">AI 5 - Clean Background Lite (မြန်ဆန်/ပေါ့ပါး  ~150-250+ ပုံ/နေ့)</option>
   </select>
 
-  <textarea id="prompt" rows="4" placeholder="ဥပမာ: a cat sitting on the moon"></textarea>
+  <div id="aiInfo" class="ai-info"></div>
+
+  <textarea id="prompt" rows="4" placeholder="ပုံဖော်ချင်တဲ့ အကြောင်းအရာနဲ့ အသေးစိတ်ကို ရေးပါ (ဥပမာ: Ancient royal palace at sunrise...)"></textarea>
+
+  <div class="style-row">
+    <button type="button" class="style-btn" onclick="applyPreset('cinematic')">+ Cinematic</button>
+    <button type="button" class="style-btn" onclick="applyPreset('modern')">+ Modern</button>
+    <button type="button" class="style-btn" onclick="applyPreset('history')">+ History</button>
+    <button type="button" class="style-btn" onclick="applyPreset('motion')">+ Motion</button>
+    <button type="button" class="style-btn" onclick="applyPreset('background')">+ Background</button>
+  </div>
+
   <button id="btn" onclick="generate()">ထုတ်မယ်</button>
 
   <div id="result">ရလဒ် ဒီမှာ ပေါ်မယ်</div>
 
-<script>
-  async function generate() {
-    var prompt = document.getElementById("prompt").value.trim();
-    var provider = document.getElementById("provider").value;
-    var result = document.getElementById("result");
-    var btn = document.getElementById("btn");
+  <script>
+    const AI_DETAILS = {
+      "ultra-cinema-pro": "အဆင့် ၁ (Highest Quality): ခန့်မှန်း နေ့စဉ် ~1525 ပုံ | Cinematic, History နှင့် အသေးစိတ်အကျဆုံး ပုံများအတွက်",
+      "modern-studio-hd": "အဆင့် ၂ (Very High Quality): ခန့်မှန်း နေ့စဉ် ~3050 ပုံ | Modern, Clean Design နှင့် ကြည်လင်ပြတ်သားသော ပုံများအတွက်",
+      "creative-art-plus": "အဆင့် ၃ (High Quality): ခန့်မှန်း နေ့စဉ် ~50100 ပုံ | History, Creative Concept နှင့် အနုပညာဆန်သော ပုံများအတွက်",
+      "motion-dynamic": "အဆင့် ၄ (Fast & Good Quality): ခန့်မှန်း နေ့စဉ် ~100150 ပုံ | Motion, လှုပ်ရှားမှုနှင့် Dynamic ရှုထောင့်ပုံများအတွက်",
+      "clean-background-lite": "အဆင့် ၅ (Fast & Light Quality): ခန့်မှန်း နေ့စဉ် ~150250+ ပုံ | Background, Wallpaper နှင့် ရိုးရှင်းမြန်ဆန်သော ပုံများအတွက်"
+    };
 
-    if (!prompt) {
-      result.innerHTML = '<span class="err">စာအရင်ရေးပါ</span>';
-      return;
+    const STYLE_PRESETS = {
+      cinematic: "cinematic lighting, 35mm lens, shallow depth of field, dramatic rim light, rich contrast, film grain, ultra detailed, no watermark",
+      modern: "modern sleek aesthetic, contemporary architecture, clean composition, balanced studio lighting, sharp focus, high clarity, no watermark",
+      history: "historical atmosphere, authentic period details, epic scale, warm natural lighting, museum-grade realism, intricate textures, no watermark",
+      motion: "dynamic motion blur, high speed action, sense of movement, energetic composition, crisp focal subject, dramatic lighting, no watermark",
+      background: "clean background composition, uncluttered space, smooth gradient and depth, high resolution backdrop, subtle lighting, no watermark"
+    };
+
+    function updateAiInfo() {
+      const provider = document.getElementById("provider").value;
+      document.getElementById("aiInfo").textContent = AI_DETAILS[provider] || "";
     }
 
-    btn.disabled = true;
-    result.innerText = "ထုတ်နေပါတယ်၊ ခဏစောင့်ပါ...";
+    function applyPreset(key) {
+      const promptEl = document.getElementById("prompt");
+      const current = promptEl.value.trim();
+      const preset = STYLE_PRESETS[key];
+      if (!preset) return;
+      promptEl.value = current ? `${current}, ${preset}` : preset;
+    }
 
-    try {
-      var res = await fetch("/api/image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: prompt, provider: provider })
-      });
-      var data = await res.json();
+    function isLimitError(resStatus, data) {
+      if (resStatus === 429) return true;
+      const errMsg = `${data && data.error ? data.error : ""} ${data && data.message ? data.message : ""}`.toUpperCase();
+      return (
+        errMsg.includes("LIMIT") ||
+        errMsg.includes("QUOTA") ||
+        errMsg.includes("RATE") ||
+        errMsg.includes("429")
+      );
+    }
 
-      if (data.error === "LIMIT_REACHED") {
-        result.innerHTML = '<span class="err">ဒီ AI ရဲ့ limit ပြည့်သွားပါပြီ။ တခြား AI ကို ရွေးပြီး ထပ်ကြိုးစားပါ။</span>';
-      } else if (data.error) {
-        result.innerHTML = '<span class="err">မအောင်မြင်ပါ: ' + data.error + '</span>';
-      } else {
-        result.innerHTML = '<img src="' + data.image + '">';
+    function renderDownloadButton(imageSrc) {
+      const a = document.createElement("a");
+      a.href = imageSrc;
+      a.download = `myanmar-ai-studio-${Date.now()}.png`;
+      a.style.textDecoration = "none";
+
+      const dlBtn = document.createElement("button");
+      dlBtn.type = "button";
+      dlBtn.className = "download-btn";
+      dlBtn.textContent = "ပုံ Download ဆွဲမယ်";
+      a.appendChild(dlBtn);
+      return a;
+    }
+
+    async function generate() {
+      const promptEl = document.getElementById("prompt");
+      const providerEl = document.getElementById("provider");
+      const result = document.getElementById("result");
+      const btn = document.getElementById("btn");
+
+      const prompt = promptEl.value.trim();
+      const provider = providerEl.value;
+      const providerLabel = providerEl.options[providerEl.selectedIndex].text;
+
+      if (!prompt) {
+        result.innerHTML = '<span class="err">ပုံထုတ်ရန် prompt စာအရင်ရေးပါ</span>';
+        return;
       }
-    } catch (e) {
-      result.innerHTML = '<span class="err">ချိတ်ဆက်မှု မအောင်မြင်ပါ</span>';
-    }
-    btn.disabled = false;
-  }
-</script>
-</body>
-</html> 
 
+      btn.disabled = true;
+      result.innerHTML = `<div class="status-note">အသုံးပြုနေသော AI: <b>${providerLabel}</b></div>ပုံထုတ်နေပါတယ်၊ ခဏစောင့်ပါ...`;
+
+      try {
+        const res = await fetch("/api/image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt, provider })
+        });
+
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (_) {
+          data = { error: "INVALID_RESPONSE" };
+        }
+
+        if (isLimitError(res.status, data)) {
+          result.innerHTML = `<span class="err"><b>${providerLabel}</b> ရဲ့ limit ပြည့်သွားပါပြီ။ အပေါ်က dropdown မှာ တခြား AI တစ်ခုကို ကိုယ်တိုင်ပြောင်းရွေးပြီး ထပ်ထုတ်ကြည့်ပါ။</span>`;
+          btn.disabled = false;
+          return;
+        }
+
+        if (!res.ok || data.error || !data.image) {
+          result.innerHTML = `<span class="err">ပုံထုတ်မအောင်မြင်ပါ: ${data.error || `HTTP ${res.status}`}</span>`;
+          btn.disabled = false;
+          return;
+        }
+
+        result.innerHTML = "";
+        const note = document.createElement("div");
+        note.className = "status-note";
+        note.textContent = `ထုတ်ပြီးသွားသော AI: ${providerLabel}`;
+
+        const img = document.createElement("img");
+        img.src = data.image;
+        img.alt = prompt;
+
+        result.appendChild(note);
+        result.appendChild(img);
+        result.appendChild(renderDownloadButton(data.image));
+      } catch (e) {
+        result.innerHTML = '<span class="err">ချိတ်ဆက်မှု မအောင်မြင်ပါ</span>';
+      }
+
+      btn.disabled = false;
+    }
+
+    updateAiInfo();
+  </script>
+</body>
+</html>
