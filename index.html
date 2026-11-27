@@ -3,33 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My AI App</title>
+<title>Myanmar AI Studio</title>
 <style>
   body { font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 16px; background: #111; color: #eee; }
   h1 { font-size: 22px; }
   textarea, select, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #444; background: #222; color: #eee; box-sizing: border-box; }
   button { background: #4f46e5; border: none; font-weight: bold; }
+  button:disabled { opacity: 0.5; }
   #result { margin-top: 16px; padding: 12px; border-radius: 8px; background: #222; min-height: 60px; }
+  #result img { width: 100%; border-radius: 8px; }
+  .err { color: #ff8080; }
 </style>
 </head>
 <body>
   <h1>Myanmar AI Studio</h1>
-  <p>ပုံထုတ်ရန် စာရေးပါ</p>
+  <p>ပုံထုတ်ရန် စာရေးပါ (အင်္ဂလိပ်လို ရေးမှ ပိုကောင်းတယ်)</p>
 
   <select id="provider">
-    <option>AI 1 (မကြာမီ ထည့်မယ်)</option>
+    <option value="flux">AI 1 - FLUX (အရည်အသွေးကောင်း)</option>
+    <option value="sdxl">AI 2 - SDXL (မြန်)</option>
   </select>
 
   <textarea id="prompt" rows="4" placeholder="ဥပမာ: a cat sitting on the moon"></textarea>
-  <button onclick="generate()">ထုတ်မယ်</button>
+  <button id="btn" onclick="generate()">ထုတ်မယ်</button>
 
   <div id="result">ရလဒ် ဒီမှာ ပေါ်မယ်</div>
 
 <script>
-  function generate() {
-    var text = document.getElementById("prompt").value;
-    document.getElementById("result").innerText =
-      "Web အလုပ်လုပ်နေပါပြီ။ ရေးထားတာ: " + text;
+  async function generate() {
+    var prompt = document.getElementById("prompt").value.trim();
+    var provider = document.getElementById("provider").value;
+    var result = document.getElementById("result");
+    var btn = document.getElementById("btn");
+
+    if (!prompt) {
+      result.innerHTML = '<span class="err">စာအရင်ရေးပါ</span>';
+      return;
+    }
+
+    btn.disabled = true;
+    result.innerText = "ထုတ်နေပါတယ်၊ ခဏစောင့်ပါ...";
+
+    try {
+      var res = await fetch("/api/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt, provider: provider })
+      });
+      var data = await res.json();
+
+      if (data.error === "LIMIT_REACHED") {
+        result.innerHTML = '<span class="err">ဒီ AI ရဲ့ limit ပြည့်သွားပါပြီ။ တခြား AI ကို ရွေးပြီး ထပ်ကြိုးစားပါ။</span>';
+      } else if (data.error) {
+        result.innerHTML = '<span class="err">မအောင်မြင်ပါ: ' + data.error + '</span>';
+      } else {
+        result.innerHTML = '<img src="' + data.image + '">';
+      }
+    } catch (e) {
+      result.innerHTML = '<span class="err">ချိတ်ဆက်မှု မအောင်မြင်ပါ</span>';
+    }
+    btn.disabled = false;
   }
 </script>
 </body>
